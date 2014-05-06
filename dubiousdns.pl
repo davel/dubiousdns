@@ -9,6 +9,8 @@ use FindBin;
 use LWP::UserAgent;
 use Socket;
 
+alarm(60);
+
 my $config = LoadFile("$FindBin::Bin/config.yaml");
 
 my $our_ip = get_local_ip();
@@ -41,20 +43,23 @@ if (!defined($old_ip)) {
 
 if ($old_ip ne $our_ip) {
     warn "updating dns to $our_ip from $old_ip";
-    open(my $fh, "-|", "nsupdate", "-k", "$FindBin::Bin/".$config->{key}) or die $!;
+    open(my $fh, "|-", "nsupdate", "-k", "$FindBin::Bin/".$config->{key}) or die $!;
     print $fh "server ".$config->{server}."\n";
     print $fh "zone ".$config->{zone}."\n";
     print $fh "update delete ".$config->{hostname}."\n";
-    print $fh "update add ".$config->{hostname}. " ".$config->{ttl}." $our_ip\n";
+    print $fh "update add ".$config->{hostname}. " ".$config->{ttl}." A $our_ip\n";
     print $fh "send\n";
     close $fh;
+
+	die "Updating DNS failed!" if $?!=0;
 }
 
-open(my $fh, ">", $config->{ip_filename}) or die $!;
-print $fh "$our_ip\n";
-close $fh;
+open(my $fh2, ">", $config->{ip_filename}) or die $!;
+print $fh2 "$our_ip\n";
+close $fh2;
+
 exit 0;
-   
+ 
 
 sub get_local_ip {
     my $router_ip = $config->{router_ip};
