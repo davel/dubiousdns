@@ -51,7 +51,7 @@ if ($old_ip ne $our_ip) {
     print $fh "send\n";
     close $fh;
 
-	die "Updating DNS failed!" if $?!=0;
+    die "Updating DNS failed!" if $?!=0;
 }
 
 open(my $fh2, ">", $config->{ip_filename}) or die $!;
