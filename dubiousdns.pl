@@ -14,6 +14,12 @@ alarm(60);
 my $config = LoadFile("$FindBin::Bin/config.yaml");
 
 my $our_ip = get_local_ip();
+
+if ($our_ip eq '0.0.0.0') {
+    warn "IP address is $our_ip, not updating";
+    exit 0;
+}
+
 my $old_ip;
 
 # To avoid hitting the twittertubes more than necessary, cache the last
